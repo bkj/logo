@@ -110,17 +110,17 @@ class GalleryEncoder(nn.Module):
         x1 = self.block1(x0)
         p1 = F.max_pool2d(x1, kernel_size=2, stride=2)
         
-        x2 = self.block2(x1)
-        p2 = F.max_pool2d(x1, kernel_size=2, stride=2)
+        x2 = self.block2(p1)
+        p2 = F.max_pool2d(x2, kernel_size=2, stride=2)
         
-        x3 = self.block3(x2)
-        p3 = F.max_pool2d(x1, kernel_size=2, stride=2)
+        x3 = self.block3(p2)
+        p3 = F.max_pool2d(x3, kernel_size=2, stride=2)
         
-        x4 = self.block4(x3)
-        p4 = F.max_pool2d(x1, kernel_size=2, stride=2)
+        x4 = self.block4(p3)
+        p4 = F.max_pool2d(x4, kernel_size=2, stride=2)
         
-        x5 = self.block5(x4)
-        p5 = F.max_pool2d(x1, kernel_size=2, stride=2)
+        x5 = self.block5(p4)
+        p5 = F.max_pool2d(x5, kernel_size=2, stride=2)
         
         return (x1, x2, x3, x4, x5, p5)
 
@@ -131,16 +131,16 @@ class GalleryDecoder(nn.Module):
         
         conv_kwargs = {"kernel_size" : 3, "stride" : 1, "padding" : 1}
         
-        self.up5 = DoubleUpConv(2 * 512, 512, **conv_kwargs)
-        self.up4 = DoubleUpConv(2 * 512, 512, **conv_kwargs) # There's a difference between code and drawing here
-        self.up3 = DoubleUpConv(2 * 256, 128, **conv_kwargs) # ^
-        self.up2 = DoubleUpConv(2 * 128, 64, **conv_kwargs)  # ^
-        self.up1 = DoubleUpConv(2 * 64, 64, **conv_kwargs)   # ^
+        self.up5 = DoubleUpConv(512 + 512, 512, **conv_kwargs)
+        self.up4 = DoubleUpConv(512 + 512, 512, **conv_kwargs)
+        self.up3 = DoubleUpConv(512 + 256, 256, **conv_kwargs)
+        self.up2 = DoubleUpConv(256 + 128, 128, **conv_kwargs)
+        self.up1 = DoubleUpConv(128 + 64, 64, **conv_kwargs)
         
         self.s_conv4 = RConv2d(512 + q_channels, 512, kernel_size=1)
-        self.s_conv3 = RConv2d(256 + q_channels, 256, kernel_size=1)
-        self.s_conv2 = RConv2d(128 + q_channels, 128, kernel_size=1)
-        self.s_conv1 = RConv2d(64 + q_channels, 64, kernel_size=1)
+        self.s_conv3 = RConv2d(512 + q_channels, 256, kernel_size=1)
+        self.s_conv2 = RConv2d(256 + q_channels, 128, kernel_size=1)
+        self.s_conv1 = RConv2d(128 + q_channels, 64, kernel_size=1)
         
         self.out = nn.Conv2d(64, 1, **conv_kwargs)
         
