@@ -148,18 +148,18 @@ class GalleryDecoder(nn.Module):
         
         (x1, x2, x3, x4, x5, p5) = gallery_encs
         
-        up5 = self.up5(torch.cat([p5, spatial_tile(query_enc, p5.shape)], dim=1)) # 1024 -> 512
+        up5 = self.up5(torch.cat([p5, spatial_tile(query_enc, p5.shape)], dim=1))           # 512 + 512 -> 512
         
-        shortcut4 = self.s_conv4(torch.cat([x5, spatial_tile(query_enc, x5.shape)], dim=1)) # 1024 -> 512
-        up4       = self.up4(torch.cat([up5, shortcut4], dim=1))
+        shortcut4 = self.s_conv4(torch.cat([x5, spatial_tile(query_enc, x5.shape)], dim=1)) # 512 + 512 -> 512
+        up4       = self.up4(torch.cat([up5, shortcut4], dim=1))                            # 512 + 512 -> 512
         
-        shortcut3 = self.s_conv3(torch.cat([x4, spatial_tile(query_enc, x4.shape)], dim=1)) # 
-        up3       = self.up3(torch.cat([up4, shortcut3], dim=1))
+        shortcut3 = self.s_conv3(torch.cat([x4, spatial_tile(query_enc, x4.shape)], dim=1)) # 512 + 512 -> 256
+        up3       = self.up3(torch.cat([up4, shortcut3], dim=1))                            # 512 + 256 -> 256
         
-        shortcut2 = self.s_conv2(torch.cat([x3, spatial_tile(query_enc, x3.shape)], dim=1))
-        up2       = self.up2(torch.cat([up3, shortcut2], dim=1))
+        shortcut2 = self.s_conv2(torch.cat([x3, spatial_tile(query_enc, x3.shape)], dim=1)) # 256 + 512 -> 128
+        up2       = self.up2(torch.cat([up3, shortcut2], dim=1))                            # 256 + 128 -> 128
         
-        shortcut1 = self.s_conv1(torch.cat([x2, spatial_tile(query_enc, x2.shape)], dim=1))
-        up1       = self.up1(torch.cat([up2, shortcut1], dim=1))
+        shortcut1 = self.s_conv1(torch.cat([x2, spatial_tile(query_enc, x2.shape)], dim=1)) # 128 + 512 -> 64
+        up1       = self.up1(torch.cat([up2, shortcut1], dim=1))                            # 128 + 64  -> 64
         
         return self.out(up1)
