@@ -16,7 +16,7 @@ from glob import glob
 
 def load_bbox(paths):
     for path in paths:
-        for bbox in open(path).read().splitlines()[1:]:
+        for i, bbox in enumerate(open(path).read().splitlines()[1:]):
             bbox = [int(bb) for bb in bbox.split(' ')]
             out = {
                 "id"     : os.path.basename(path).split('.')[0],
@@ -27,24 +27,25 @@ def load_bbox(paths):
                 "lower"  : bbox[1] + bbox[3],
             }
             
-            out['img_path'] = os.path.join('classes/jpg', out['class'], out['id'] + '.jpg')
+            out['img_path']   = os.path.join('data/classes/jpg', out['class'], out['id'] + '.jpg')
+            out['query_path'] = os.path.join('data/classes/query', out['class'], out['id'] + '.' + str(i) + '.jpg')
             
             yield out
 
 def make_query(row):
-    outpath = os.path.join('classes/query', row['class'], row['id'] + '.jpg')
-    os.makedirs(os.path.dirname(outpath), exist_ok=True)
+    os.makedirs(os.path.dirname(row.query_path), exist_ok=True)
     
     img   = Image.open(row.img_path)
     query = img.crop((row['left'], row['upper'], row['right'], row['lower']))
-    query.save(outpath)
+    query.save(row.query_path)
 
 
 if __name__ == "__main__":
-    bbox_paths = glob('classes/masks/*/*bboxes.txt')
+    bbox_paths = glob('data/classes/masks/*/*bboxes.txt')
     all_bbox   = list(load_bbox(bbox_paths))
     
     all_bbox = pd.DataFrame(all_bbox, columns=all_bbox[0].keys())
+    all_bbox.to_csv('data/all_bbox.tsv', sep='\t', index=False)
     
-    for _, row in tqdm(all_bbox.iterrows()):
+    for _, row in tqdm(all_bbox.iterrows(), total=all_bbox.shape[0]):
         make_query(row)
